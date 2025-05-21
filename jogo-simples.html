@@ -23,20 +23,73 @@
     .placar {
       display: flex;
       justify-content: center;
-      gap: 30px;
-      margin: 10px 0;
-      font-size: 1.2rem;
-      color: #1a237e;
-    }
-    
-    .acertos, .erros {
-      padding: 5px 15px;
-      border-radius: 10px;
+      align-items: center;
+      gap: 15px;
+      background: linear-gradient(145deg, #1a237e, #283593);
       color: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      max-width: 350px;
+      margin: 15px auto 25px;
+      font-family: 'Arial Black', Arial, sans-serif;
+      position: relative;
+      overflow: hidden;
+      border: 3px solid #0d47a1;
     }
     
-    .acertos { background: #4CAF50; }
-    .erros { background: #f44336; }
+    .placar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .placar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .placar-titulo {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+      color: #bbdefb;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .placar-valor {
+      background: white;
+      color: #0d47a1;
+      font-size: 2rem;
+      font-weight: bold;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+      border: 3px solid #0d47a1;
+      position: relative;
+    }
+    
+    .placar-separador {
+      font-size: 2.5rem;
+      color: white;
+      margin: 0 5px;
+      text-shadow: 0 2px 3px rgba(0,0,0,0.3);
+    }
+    
+    .acertos .placar-valor { color: #2e7d32; border-color: #2e7d32; }
+    .erros .placar-valor { color: #c62828; border-color: #c62828; }
     
 
     
@@ -57,11 +110,18 @@
       border: none;
       color: white;
       font-size: 1.8rem;
-      margin: 10px 0;
+      margin: 10px auto 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .botao-audio:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
     }
     
     .botao-audio.tocando {
@@ -166,8 +226,17 @@
 </head>
 <body>
   <div class="placar">
-    <div>Acertos: <span id="acertos">0</span></div>
-    <div>Erros: <span id="erros">0</span></div>
+    <div class="placar-item acertos">
+      <div class="placar-titulo">Acertos</div>
+      <div class="placar-valor" id="acertos">0</div>
+    </div>
+    
+    <div class="placar-separador">×</div>
+    
+    <div class="placar-item erros">
+      <div class="placar-titulo">Erros</div>
+      <div class="placar-valor" id="erros">0</div>
+    </div>
   </div>
   
   <div class="area-jogo" style="text-align: center;">
@@ -200,11 +269,46 @@
     
     // Lista de sílabas disponíveis
     const silabas = [
+      // B
       'ba', 'be', 'bi', 'bo', 'bu',
+      // C
       'ca', 'ce', 'ci', 'co', 'cu',
+      // D
       'da', 'de', 'di', 'do', 'du',
+      // F
       'fa', 'fe', 'fi', 'fo', 'fu',
-      'ga', 'ge', 'gi', 'go', 'gu'
+      // G
+      'ga', 'ge', 'gi', 'go', 'gu',
+      // J
+      'ja', 'je', 'ji', 'jo', 'ju',
+      // L
+      'la', 'le', 'li', 'lo', 'lu',
+      // M
+      'ma', 'me', 'mi', 'mo', 'mu',
+      // N
+      'na', 'ne', 'ni', 'no', 'nu',
+      // P
+      'pa', 'pe', 'pi', 'po', 'pu',
+      // R
+      'ra', 're', 'ri', 'ro', 'ru',
+      // S
+      'sa', 'se', 'si', 'so', 'su',
+      // T
+      'ta', 'te', 'ti', 'to', 'tu',
+      // V
+      'va', 've', 'vi', 'vo', 'vu',
+      // X
+      'xa', 'xe', 'xi', 'xo', 'xu',
+      // Z
+      'za', 'ze', 'zi', 'zo', 'zu',
+      // Dígrafos
+      'cha', 'che', 'chi', 'cho', 'chu',
+      'lha', 'lhe', 'lhi', 'lho', 'lhu',
+      'nha', 'nhe', 'nhi', 'nho', 'nhu',
+      'rra', 'rre', 'rri', 'rro', 'rru',
+      'ssa', 'sse', 'ssi', 'sso', 'ssu',
+      'qua', 'que', 'qui', 'quo', 'quu',
+      'gua', 'gue', 'gui', 'guo', 'guu'
     ];
     
     // Função para verificar se um arquivo existe
@@ -246,46 +350,29 @@
       });
     });
     
-    // Função para carregar e tocar áudio com volume máximo
+    // Função para carregar e tocar áudio
     function tocarAudio() {
-      const botaoAudio = document.querySelector('.botao-audio');
-      
-      // Se já estiver tocando, não faz nada
-      if (botaoAudio.classList.contains('tocando')) return;
-      
       // Cria um novo elemento de áudio para cada reprodução
-      const audio = new Audio();
-      audio.src = `silabas_sons/${silabaAtual}.mp3`;
-      audio.volume = 1.0; // Volume máximo
+      const audio = new Audio(`silabas_sons/${silabaAtual}.mp3`);
+      
+      // Configura para o volume máximo
+      audio.volume = 1.0;
       audio.preload = 'auto';
-      audio.setAttribute('playsinline', '');
-      audio.muted = false;
+      audio.load(); // Força o carregamento
       
       // Tenta reproduzir o áudio
       const playPromise = audio.play();
       
       if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            botaoAudio.classList.add('tocando');
-            audio.onended = function() {
-              botaoAudio.classList.remove('tocando');
-            };
-          })
-          .catch(error => {
-            console.error("Erro ao reproduzir áudio:", error);
-            // Tenta novamente com interação do usuário
-            document.body.addEventListener('click', function tentarNovamente() {
-              audio.play().then(() => {
-                botaoAudio.classList.add('tocando');
-                audio.onended = function() {
-                  botaoAudio.classList.remove('tocando');
-                  audio.remove();
-                };
-                document.body.removeEventListener('click', tentarNovamente);
-              });
-            }, { once: true });
-          });
+        playPromise.catch(error => {
+          console.error("Erro ao reproduzir áudio:", error);
+          // Tenta novamente com interação do usuário
+          document.addEventListener('click', function tentarNovamente() {
+            audio.play().finally(() => {
+              document.removeEventListener('click', tentarNovamente);
+            });
+          }, { once: true });
+        });
       }
     }
     
@@ -294,15 +381,16 @@
       const audio = new Audio('sons/acerto.mp3');
       audio.volume = 1.0; // Volume máximo
       audio.preload = 'auto';
+      audio.load(); // Força o carregamento
       // Tenta reproduzir o som
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           console.error("Erro ao tocar som de acerto:", e);
           // Tenta novamente com interação do usuário
-          document.body.addEventListener('click', function tentarNovamente() {
+          document.addEventListener('click', function tentarNovamente() {
             audio.play().finally(() => {
-              document.body.removeEventListener('click', tentarNovamente);
+              document.removeEventListener('click', tentarNovamente);
             });
           }, { once: true });
         });
@@ -314,15 +402,16 @@
       const audio = new Audio('sons/erro.mp3');
       audio.volume = 1.0; // Volume máximo
       audio.preload = 'auto';
+      audio.load(); // Força o carregamento
       // Tenta reproduzir o som
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           console.error("Erro ao tocar som de erro:", e);
           // Tenta novamente com interação do usuário
-          document.body.addEventListener('click', function tentarNovamente() {
+          document.addEventListener('click', function tentarNovamente() {
             audio.play().finally(() => {
-              document.body.removeEventListener('click', tentarNovamente);
+              document.removeEventListener('click', tentarNovamente);
             });
           }, { once: true });
         });
