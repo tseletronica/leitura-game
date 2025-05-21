@@ -226,24 +226,38 @@
       // Tenta carregar o áudio da sílaba atual
       const audio = new Audio(`silabas_sons/${silabaAtual}.mp3`);
       
+      // Aumenta o volume para o máximo (1.0)
+      audio.volume = 1.0;
+      
+      // Configura o áudio para tocar em alta potência
+      audio.preload = 'auto';
+      audio.load();
+      
       // Tenta reproduzir o áudio
-      audio.play()
-        .then(() => {
-          botaoAudio.classList.add('tocando');
-          audio.onended = function() {
-            botaoAudio.classList.remove('tocando');
-          };
-        })
-        .catch(error => {
-          console.error("Erro ao reproduzir áudio:", error);
-          // Mostra mensagem de erro no console
-          console.log("Verifique se o arquivo de áudio existe em: silabas_sons/" + silabaAtual + ".mp3");
-        });
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            botaoAudio.classList.add('tocando');
+            audio.onended = function() {
+              botaoAudio.classList.remove('tocando');
+            };
+          })
+          .catch(error => {
+            console.error("Erro ao reproduzir áudio:", error);
+            console.log("Tentando reproduzir com volume mais baixo...");
+            // Tenta novamente com volume mais baixo se falhar
+            audio.volume = 0.8;
+            audio.play().catch(e => console.error("Falha ao reproduzir áudio:", e));
+          });
+      }
     }
     
     // Toca som de acerto
     function tocarSomAcerto() {
       const audio = new Audio('sons/acerto.mp3');
+      audio.volume = 1.0; // Volume máximo
       audio.play().catch(e => {
         console.error("Erro ao tocar som de acerto:", e);
         console.log("Verifique se o arquivo de som existe em: sons/acerto.mp3");
@@ -253,6 +267,7 @@
     // Toca som de erro
     function tocarSomErro() {
       const audio = new Audio('sons/erro.mp3');
+      audio.volume = 1.0; // Volume máximo
       audio.play().catch(e => {
         console.error("Erro ao tocar som de erro:", e);
         console.log("Verifique se o arquivo de som existe em: sons/erro.mp3");
