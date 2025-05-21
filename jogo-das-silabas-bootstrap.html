@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jogo de Leitura</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --cor-primaria: #4CAF50;
+      --cor-secundaria: #2196F3;
+      --cor-destaque: #FF9800;
+      --cor-placar: #1a237e;
+      --cor-placar-claro: #283593;
+      --cor-texto: #333;
+      --cor-fundo: #f0f8ff;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--cor-fundo);
+      color: var(--cor-texto);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .btn-opcao {
+      font-size: 1.5rem;
+      min-height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      margin: 0.2rem;
+    }
+    
+    .btn-opcao:hover {
+      transform: translateY(-2px);
+    }
+    
+    .resposta {
+      font-size: 1.5rem;
+      font-weight: bold;
+      min-height: 3rem;
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+    }
+    
+    .botao-audio {
+      width: 5rem;
+      height: 5rem;
+      border-radius: 50%;
+      border: none;
+      background-color: var(--cor-secundaria);
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem auto;
+      transition: all 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .botao-audio:hover {
+      transform: scale(1.05);
+    }
+    
+    .botao-audio.tocando {
+      animation: piscar 0.8s infinite alternate;
+    }
+    
+    @keyframes piscar {
+      from { opacity: 1; }
+      to { opacity: 0.6; }
+    }
+    
+    .placar-container {
+      background: linear-gradient(145deg, var(--cor-placar), var(--cor-placar-claro));
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin: 1rem auto;
+      max-width: 600px;
+      width: 100%;
+    }
+    
+    .placar-titulo {
+      color: #ffeb3b;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .placar-pontos {
+      display: flex;
+      justify-content: space-around;
+      gap: 1rem;
+    }
+    
+    .placar-acertos, .placar-erros {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      padding: 0.8rem 1rem;
+      flex: 1;
+      text-align: center;
+    }
+    
+    .placar-acertos {
+      border: 2px solid #4caf50;
+    }
+    
+    .placar-erros {
+      border: 2px solid #f44336;
+    }
+    
+    .placar-rotulo {
+      color: #b3e5fc;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+    
+    .placar-numero {
+      color: white;
+      font-size: 1.8rem;
+      font-weight: bold;
+      display: block;
+      line-height: 1.2;
+    }
+    
+    /* Ajustes para telas pequenas */
+    @media (max-width: 768px) {
+      .btn-opcao {
+        font-size: 1.3rem;
+        min-height: 3.5rem;
+      }
+      
+      .resposta {
+        font-size: 1.3rem;
+      }
+      
+      .botao-audio {
+        width: 4.5rem;
+        height: 4.5rem;
+        font-size: 1.8rem;
+      }
+      
+      .placar-titulo {
+        font-size: 1.3rem;
+      }
+      
+      .placar-numero {
+        font-size: 1.6rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .btn-opcao {
+        font-size: 1.1rem;
+        min-height: 3rem;
+        padding: 0.5rem 0.3rem;
+      }
+      
+      .resposta {
+        font-size: 1.2rem;
+        padding: 0.4rem;
+        margin: 0.3rem 0;
+      }
+      
+      .botao-audio {
+        width: 4rem;
+        height: 4rem;
+        font-size: 1.6rem;
+        margin: 0.5rem auto;
+      }
+      
+      .placar-container {
+        padding: 0.8rem;
+        margin: 0.8rem auto;
+      }
+      
+      .placar-titulo {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+      }
+      
+      .placar-rotulo {
+        font-size: 0.8rem;
+      }
+      
+      .placar-numero {
+        font-size: 1.4rem;
+      }
+      
+      .placar-pontos {
+        gap: 0.5rem;
+      }
+      
+      .placar-acertos, .placar-erros {
+        padding: 0.5rem 0.3rem;
+      }
+    }
+    
+    @media (max-height: 600px) and (orientation: landscape) {
+      .btn-opcao {
+        min-height: 2.8rem;
+        font-size: 1rem;
+        padding: 0.3rem 0.2rem;
+      }
+      
+      .resposta {
+        font-size: 1.1rem;
+        min-height: 2.2rem;
+        padding: 0.2rem;
+        margin: 0.2rem 0;
+      }
+      
+      .botao-audio {
+        width: 3.5rem;
+        height: 3.5rem;
+        font-size: 1.5rem;
+        margin: 0.3rem auto;
+      }
+      
+      .placar-container {
+        padding: 0.5rem;
+        margin: 0.5rem auto;
+      }
+      
+      .placar-titulo {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .placar-rotulo {
+        font-size: 0.7rem;
+        margin-bottom: 0.1rem;
+      }
+      
+      .placar-numero {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <div class="container py-3 flex-grow-1 d-flex flex-column">
+    <!-- Placar -->
+    <div class="placar-container">
+      <div class="text-center">
+        <div class="placar-titulo">Placar</div>
+        <div class="placar-pontos">
+          <div class="placar-acertos">
+            <span class="placar-rotulo">Acertos</span>
+            <span id="acertos" class="placar-numero">0</span>
+          </div>
+          <div class="placar-erros">
+            <span class="placar-rotulo">Erros</span>
+            <span id="erros" class="placar-numero">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Conteúdo Principal -->
+    <div class="flex-grow-1 d-flex flex-column justify-content-center">
+      <!-- Botão de Áudio -->
+      <div class="text-center my-3">
+        <button class="botao-audio" onclick="tocarAudio()">
+          <i class="bi bi-volume-up"></i>
+        </button>
+        <audio id="audio" src=""></audio>
+      </div>
+      
+      <!-- Resposta -->
+      <div class="resposta text-center mx-auto my-3" id="resposta"></div>
+      
+      <!-- Opções -->
+      <div class="row g-2 justify-content-center my-3" id="opcoes">
+        <!-- Opções serão inseridas aqui via JavaScript -->
+      </div>
+      
+      <!-- Botão OK -->
+      <div class="text-center mt-4">
+        <button class="btn btn-warning btn-lg px-5 py-2" onclick="verificarResposta()" id="btn-ok" disabled>
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Variáveis globais
+    let silabaAtual = '';
+    let respostaSelecionada = null;
+    let acertos = 0;
+    let erros = 0;
+    let audioAtual = '';
+    
+    // Lista de sílabas disponíveis
+    const silabas = [
+      'ba', 'be', 'bi', 'bo', 'bu',
+      'ca', 'ce', 'ci', 'co', 'cu',
+      'da', 'de', 'di', 'do', 'du',
+      'fa', 'fe', 'fi', 'fo', 'fu',
+      'ga', 'ge', 'gi', 'go', 'gu',
+      'ja', 'je', 'ji', 'jo', 'ju',
+      'la', 'le', 'li', 'lo', 'lu',
+      'ma', 'me', 'mi', 'mo', 'mu',
+      'na', 'ne', 'ni', 'no', 'nu',
+      'pa', 'pe', 'pi', 'po', 'pu',
+      'ra', 're', 'ri', 'ro', 'ru',
+      'sa', 'se', 'si', 'so', 'su',
+      'ta', 'te', 'ti', 'to', 'tu',
+      'va', 've', 'vi', 'vo', 'vu',
+      'xa', 'xe', 'xi', 'xo', 'xu',
+      'za', 'ze', 'zi', 'zo', 'zu',
+      'cha', 'che', 'chi', 'cho', 'chu',
+      'lha', 'lhe', 'lhi', 'lho', 'lhu',
+      'nha', 'nhe', 'nhi', 'nho', 'nhu',
+      'rra', 'rre', 'rri', 'rro', 'rru',
+      'ssa', 'sse', 'ssi', 'sso', 'ssu'
+    ];
+    
+    // Inicializa o jogo quando a página carregar
+    window.onload = function() {
+      // Inicia o jogo
+      novaPergunta();
+      
+      // Adiciona evento de clique nas opções
+      document.getElementById('opcoes').addEventListener('click', function(e) {
+        const botao = e.target.closest('.btn-opcao');
+        if (!botao) return;
+        
+        // Remove a seleção de todos os botões
+        document.querySelectorAll('.btn-opcao').forEach(btn => {
+          btn.classList.remove('active', 'btn-primary');
+          btn.classList.add('btn-outline-primary');
+        });
+        
+        // Seleciona o botão clicado
+        botao.classList.add('active', 'btn-primary');
+        botao.classList.remove('btn-outline-primary');
+        respostaSelecionada = botao.textContent.trim();
+        document.getElementById('btn-ok').disabled = false;
+      });
+    };
+    
+    // Toca o áudio da sílaba atual
+    function tocarAudio() {
+      const audio = document.getElementById('audio');
+      const botaoAudio = document.querySelector('.botao-audio');
+      
+      // Se já estiver tocando, para o áudio
+      if (!audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+        botaoAudio.classList.remove('tocando');
+        return;
+      }
+      
+      // Define a fonte do áudio
+      audio.src = `audios/${silabaAtual}.mp3`;
+      
+      // Tenta reproduzir o áudio
+      audio.play().then(() => {
+        botaoAudio.classList.add('tocando');
+      }).catch(error => {
+        console.error("Erro ao reproduzir áudio:", error);
+        // Se der erro, tenta com a sílaba sem acento
+        const silabaSemAcento = silabaAtual.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        if (silabaSemAcento !== silabaAtual) {
+          audio.src = `audios/${silabaSemAcento}.mp3`;
+          audio.play().then(() => {
+            botaoAudio.classList.add('tocando');
+          });
+        }
+      });
+      
+      // Quando o áudio terminar
+      audio.onended = function() {
+        botaoAudio.classList.remove('tocando');
+      };
+    }
+    
+    // Toca som de acerto
+    function tocarSomAcerto() {
+      const audio = new Audio('sons/acerto.mp3');
+      audio.play().catch(e => console.error("Erro ao tocar som de acerto:", e));
+    }
+    
+    // Toca som de erro
+    function tocarSomErro() {
+      const audio = new Audio('sons/erro.mp3');
+      audio.play().catch(e => console.error("Erro ao tocar som de erro:", e));
+    }
+    
+    // Cria um elemento de destaque para a sílaba
+    function criarDestaqueSilaba(silaba, corFundo) {
+      const destaque = document.createElement('span');
+      destaque.textContent = silaba;
+      destaque.style.backgroundColor = corFundo;
+      destaque.style.color = 'white';
+      destaque.style.padding = '0.2rem 0.5rem';
+      destaque.style.borderRadius = '0.5rem';
+      destaque.style.margin = '0 0.2rem';
+      destaque.style.display = 'inline-block';
+      destaque.style.animation = 'pulse 0.5s';
+      return destaque;
+    }
+    
+    // Verifica a resposta quando o botão OK for clicado
+    function verificarResposta() {
+      if (!respostaSelecionada) return;
+      
+      const respostaElemento = document.getElementById('resposta');
+      const btnOk = document.getElementById('btn-ok');
+      const opcoesContainer = document.getElementById('opcoes');
+      
+      // Desabilita o botão OK e as opções
+      btnOk.disabled = true;
+      opcoesContainer.querySelectorAll('button').forEach(btn => {
+        btn.disabled = true;
+      });
+      
+      // Verifica se a resposta está correta
+      if (respostaSelecionada === silabaAtual) {
+        // Resposta correta
+        acertos++;
+        document.getElementById('acertos').textContent = acertos;
+        respostaElemento.innerHTML = '';
+        respostaElemento.appendChild(criarDestaqueSilaba(silabaAtual, '#4CAF50'));
+        respostaElemento.innerHTML += ' <span class="ms-2">Correto! 🎉</span>';
+        tocarSomAcerto();
+      } else {
+        // Resposta incorreta
+        erros++;
+        document.getElementById('erros').textContent = erros;
+        
+        // Mostra a resposta correta
+        respostaElemento.innerHTML = '';
+        respostaElemento.appendChild(document.createTextNode('Resposta correta: '));
+        respostaElemento.appendChild(criarDestaqueSilaba(silabaAtual, '#4CAF50'));
+        respostaElemento.innerHTML += ` <span class="ms-2">Você respondeu: </span>`;
+        respostaElemento.appendChild(criarDestaqueSilaba(respostaSelecionada, '#f44336'));
+        tocarSomErro();
+      }
+      
+      // Prepara a próxima pergunta após um breve atraso
+      setTimeout(novaPergunta, 2000);
+    }
+    
+    // Gera uma nova pergunta
+    function novaPergunta() {
+      // Limpa a seleção
+      respostaSelecionada = null;
+      document.getElementById('resposta').textContent = '';
+      document.getElementById('btn-ok').disabled = true;
+      
+      // Seleciona uma sílaba aleatória
+      const indice = Math.floor(Math.random() * silabas.length);
+      silabaAtual = silabas[indice];
+      
+      // Gera as opções de resposta
+      gerarOpcoes();
+    }
+    
+    // Gera os botões de opção
+    function gerarOpcoes() {
+      const opcoesContainer = document.getElementById('opcoes');
+      opcoesContainer.innerHTML = '';
+      
+      // Cria um array com 4 opções (1 correta e 3 incorretas)
+      let opcoes = [silabaAtual];
+      
+      // Adiciona 3 opções incorretas
+      while (opcoes.length < 4) {
+        const indice = Math.floor(Math.random() * silabas.length);
+        const opcao = silabas[indice];
+        
+        // Garante que não haverá opções duplicadas
+        if (!opcoes.includes(opcao)) {
+          opcoes.push(opcao);
+        }
+      }
+      
+      // Embaralha as opções
+      opcoes = opcoes.sort(() => Math.random() - 0.5);
+      
+      // Cria os botões de opção
+      opcoes.forEach(opcao => {
+        const col = document.createElement('div');
+        col.className = 'col-6 col-sm-4 col-md-3 mb-2';
+        
+        const botao = document.createElement('button');
+        botao.className = 'btn btn-opcao btn-outline-primary w-100';
+        botao.textContent = opcao;
+        botao.type = 'button';
+        
+        col.appendChild(botao);
+        opcoesContainer.appendChild(col);
+      });
+      
+      // Habilita os botões de opção
+      opcoesContainer.querySelectorAll('button').forEach(btn => {
+        btn.disabled = false;
+      });
+    }
+  </script>
+</body>
+</html>

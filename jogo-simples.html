@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jogo de Leitura</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      padding: 10px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .placar {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px 0;
+      font-size: 1.2rem;
+    }
+    
+    .acertos, .erros {
+      padding: 5px 15px;
+      border-radius: 10px;
+      color: white;
+    }
+    
+    .acertos { background: #4CAF50; }
+    .erros { background: #f44336; }
+    
+    .area-jogo {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .botao-audio {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #2196F3;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .botao-audio.tocando {
+      background: #1976D2;
+      transform: scale(0.95);
+    }
+    
+    .resposta {
+      font-size: 1.8rem;
+      min-height: 60px;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .opcoes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    .opcao {
+      padding: 15px;
+      font-size: 1.5rem;
+      border: 2px solid #2196F3;
+      background: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    
+    .opcao:hover, .opcao.selecionada {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .botao-ok {
+      margin-top: 30px;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      background: #FF9800;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+    }
+    
+    .botao-ok:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .feedback {
+      margin-top: 15px;
+      font-size: 1.2rem;
+      min-height: 30px;
+    }
+    
+    .correto { color: #4CAF50; }
+    .errado { color: #f44336; }
+    
+    @media (max-width: 400px) {
+      .opcoes {
+        grid-template-columns: 1fr;
+      }
+      
+      .opcao {
+        padding: 12px;
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="placar">
+    <div class="acertos">Acertos: <span id="acertos">0</span></div>
+    <div class="erros">Erros: <span id="erros">0</span></div>
+  </div>
+  
+  <div class="area-jogo" style="text-align: center;">
+    <button class="botao-audio" onclick="tocarAudio()" id="botaoAudio" style="margin: 0 auto 10px; display: block;">▶️</button>
+    <h3 style="margin: 0 0 20px; color: #1a237e;">Qual sílaba você ouviu?</h3>
+    
+    <div class="resposta" id="resposta" style="font-size: 2rem; font-weight: bold; min-height: 60px; display: flex; align-items: center; justify-content: center;"></div>
+    
+    <!-- Mensagem de feedback -->
+    <div id="feedback" style="min-height: 30px; text-align: center; margin: 10px 0; font-weight: bold;"></div>
+    
+    <!-- Mensagem de depuração -->
+    <div id="debug" style="color: red; font-size: 0.8rem; margin: 10px 0;"></div>
+    
+    <div class="opcoes" id="opcoes">
+      <!-- Opções serão inseridas aqui via JavaScript -->
+    </div>
+    
+    <div class="feedback" id="feedback"></div>
+    
+    <button class="botao-ok" onclick="verificarResposta()" id="btn-ok" disabled>OK</button>
+  </div>
+
+  <script>
+    // Variáveis globais
+    let silabaAtual = '';
+    let respostaSelecionada = null;
+    let acertos = 0;
+    let erros = 0;
+    
+    // Lista de sílabas disponíveis
+    const silabas = [
+      'ba', 'be', 'bi', 'bo', 'bu',
+      'ca', 'ce', 'ci', 'co', 'cu',
+      'da', 'de', 'di', 'do', 'du',
+      'fa', 'fe', 'fi', 'fo', 'fu',
+      'ga', 'ge', 'gi', 'go', 'gu'
+    ];
+    
+    // Função para verificar se um arquivo existe
+    async function arquivoExiste(url) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+      } catch {
+        return false;
+      }
+    }
+    
+    // Inicializa o jogo quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verifica se a pasta de áudios existe
+      arquivoExiste('silabas_sons/ba.mp3').then(existe => {
+        if (!existe) {
+          document.getElementById('debug').textContent = 
+            'ERRO: Pasta de áudios não encontrada ou sem permissão de acesso.';
+        }
+      });
+      // Inicia o jogo
+      novaPergunta();
+      
+      // Adiciona evento de clique nas opções
+      document.getElementById('opcoes').addEventListener('click', function(e) {
+        const opcao = e.target.closest('.opcao');
+        if (!opcao) return;
+        
+        // Remove a seleção de todas as opções
+        document.querySelectorAll('.opcao').forEach(btn => {
+          btn.classList.remove('selecionada');
+        });
+        
+        // Seleciona a opção clicada
+        opcao.classList.add('selecionada');
+        respostaSelecionada = opcao.textContent;
+        document.getElementById('btn-ok').disabled = false;
+      });
+    });
+    
+    // Função para carregar e tocar áudio
+    function tocarAudio() {
+      const botaoAudio = document.querySelector('.botao-audio');
+      
+      // Se já estiver tocando, não faz nada
+      if (botaoAudio.classList.contains('tocando')) return;
+      
+      // Tenta carregar o áudio da sílaba atual
+      const audio = new Audio(`silabas_sons/${silabaAtual}.mp3`);
+      
+      // Tenta reproduzir o áudio
+      audio.play()
+        .then(() => {
+          botaoAudio.classList.add('tocando');
+          audio.onended = function() {
+            botaoAudio.classList.remove('tocando');
+          };
+        })
+        .catch(error => {
+          console.error("Erro ao reproduzir áudio:", error);
+          // Mostra mensagem de erro no console
+          console.log("Verifique se o arquivo de áudio existe em: silabas_sons/" + silabaAtual + ".mp3");
+        });
+    }
+    
+    // Toca som de acerto
+    function tocarSomAcerto() {
+      const audio = new Audio('sons/acerto.mp3');
+      audio.play().catch(e => {
+        console.error("Erro ao tocar som de acerto:", e);
+        console.log("Verifique se o arquivo de som existe em: sons/acerto.mp3");
+      });
+    }
+    
+    // Toca som de erro
+    function tocarSomErro() {
+      const audio = new Audio('sons/erro.mp3');
+      audio.play().catch(e => {
+        console.error("Erro ao tocar som de erro:", e);
+        console.log("Verifique se o arquivo de som existe em: sons/erro.mp3");
+      });
+    }
+    
+    // Verifica a resposta quando o botão OK for clicado
+    function verificarResposta() {
+      if (!respostaSelecionada) return;
+      
+      const respostaElemento = document.getElementById('resposta');
+      const feedbackElemento = document.getElementById('feedback');
+      const btnOk = document.getElementById('btn-ok');
+      const opcoesContainer = document.getElementById('opcoes');
+      
+      // Desabilita o botão OK e as opções
+      btnOk.disabled = true;
+      opcoesContainer.querySelectorAll('.opcao').forEach(opcao => {
+        opcao.style.pointerEvents = 'none';
+      });
+      
+      // Verifica se a resposta está correta
+      if (respostaSelecionada === silabaAtual) {
+        // Resposta correta
+        acertos++;
+        document.getElementById('acertos').textContent = acertos;
+        respostaElemento.textContent = silabaAtual;
+        respostaElemento.className = 'resposta correto';
+        tocarSomAcerto();
+        feedbackElemento.textContent = 'Parabéns! Você acertou! ✅';
+        feedbackElemento.className = 'feedback correto';
+      } else {
+        // Resposta incorreta
+        erros++;
+        document.getElementById('erros').textContent = erros;
+        respostaElemento.textContent = silabaAtual;
+        respostaElemento.className = 'resposta errado';
+        tocarSomErro();
+        feedbackElemento.innerHTML = `Você respondeu: <strong>${respostaSelecionada}</strong><br>
+                                   A resposta correta era: <strong>${silabaAtual}</strong>`;
+        feedbackElemento.className = 'feedback errado';
+      }
+      
+      // Prepara a próxima pergunta após um breve atraso
+      setTimeout(() => {
+        respostaElemento.textContent = '?';
+        respostaElemento.className = 'resposta';
+        feedbackElemento.textContent = '';
+        feedbackElemento.className = 'feedback';
+        novaPergunta();
+      }, 3000);
+    }
+    
+    // Gera uma nova pergunta
+    function novaPergunta() {
+      // Limpa a seleção
+      respostaSelecionada = null;
+      document.getElementById('resposta').textContent = '';
+      document.getElementById('btn-ok').disabled = true;
+      
+      // Seleciona uma sílaba aleatória
+      const indice = Math.floor(Math.random() * silabas.length);
+      silabaAtual = silabas[indice];
+      
+      // Gera as opções de resposta
+      gerarOpcoes();
+    }
+    
+    // Gera os botões de opção
+    function gerarOpcoes() {
+      const opcoesContainer = document.getElementById('opcoes');
+      opcoesContainer.innerHTML = '';
+      
+      // Cria um array com 4 opções (1 correta e 3 incorretas)
+      let opcoes = [silabaAtual];
+      
+      // Adiciona 3 opções incorretas
+      while (opcoes.length < 4) {
+        const indice = Math.floor(Math.random() * silabas.length);
+        const opcao = silabas[indice];
+        
+        // Garante que não haverá opções duplicadas
+        if (!opcoes.includes(opcao)) {
+          opcoes.push(opcao);
+        }
+      }
+      
+      // Embaralha as opções
+      opcoes = opcoes.sort(() => Math.random() - 0.5);
+      
+      // Cria os botões de opção
+      opcoes.forEach(opcao => {
+        const divOpcao = document.createElement('div');
+        divOpcao.className = 'opcao';
+        divOpcao.textContent = opcao;
+        opcoesContainer.appendChild(divOpcao);
+      });
+      
+      // Habilita os botões de opção
+      opcoesContainer.querySelectorAll('.opcao').forEach(opcao => {
+        opcao.style.pointerEvents = 'auto';
+      });
+    }
+  </script>
+</body>
+</html>

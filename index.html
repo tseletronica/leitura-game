@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogos de Leitura</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #2196F3;
+      margin-bottom: 40px;
+    }
+    .jogo-card {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .jogo-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .jogo-titulo {
+      font-size: 28px;
+      color: #333;
+      margin: 0 0 15px 0;
+    }
+    .jogo-descricao {
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .btn-jogar {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: bold;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .btn-jogar:hover {
+      background-color: #45a049;
+      transform: scale(1.05);
+    }
+    .logo {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">📚</div>
+    <h1>Jogos de Leitura</h1>
+    
+    <div class="jogo-card">
+      <h2 class="jogo-titulo">Jogo das Sílabas</h2>
+      <p class="jogo-descricao">Aprenda sílabas de forma divertida! Escute o som e escolha a sílaba correta.</p>
+      <a href="jogo-das-silabas.html" class="btn-jogar">Jogar Agora</a>
+    </div>
+    
+    <!-- Você pode adicionar mais jogos aqui no futuro -->
+    <!--
+    <div class="jogo-card">
+      <h2 class="jogo-titulo">Outro Jogo</h2>
+      <p class="jogo-descricao">Descrição do outro jogo.</p>
+      <a href="outro-jogo.html" class="btn-jogar">Jogar Agora</a>
+    </div>
+    -->
+  </div>
+</body>
+</html>
