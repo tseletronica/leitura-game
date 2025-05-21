@@ -23,8 +23,12 @@
     .placar {
       display: flex;
       justify-content: space-around;
-      margin: 10px 0;
+      align-items: center;
+      margin-bottom: 15px;
       font-size: 1.2rem;
+      color: #1a237e;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     
     .acertos, .erros {
@@ -35,6 +39,16 @@
     
     .acertos { background: #4CAF50; }
     .erros { background: #f44336; }
+    
+    .controle-volume {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    #volume {
+      width: 80px;
+    }
     
     .area-jogo {
       flex: 1;
@@ -103,17 +117,21 @@
     }
     
     .botao-ok {
-      margin: 10px 0 20px;
-      padding: 12px 30px;
-      font-size: 1.1rem;
+      margin: 5px auto 10px;
+      padding: 10px 25px;
+      font-size: 1rem;
       background: #FF9800;
       border: none;
       border-radius: 8px;
       color: white;
       cursor: pointer;
-      position: sticky;
+      display: block;
+      position: fixed;
       bottom: 10px;
-      z-index: 10;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
     
     .botao-ok:disabled {
@@ -158,8 +176,13 @@
 </head>
 <body>
   <div class="placar">
-    <div class="acertos">Acertos: <span id="acertos">0</span></div>
-    <div class="erros">Erros: <span id="erros">0</span></div>
+    <div>Acertos: <span id="acertos">0</span></div>
+    <div>Erros: <span id="erros">0</span></div>
+    <div class="controle-volume">
+      <span>🔈</span>
+      <input type="range" id="volume" min="0" max="2" step="0.1" value="1">
+      <span>🔊</span>
+    </div>
   </div>
   
   <div class="area-jogo" style="text-align: center;">
@@ -209,8 +232,21 @@
       }
     }
     
+    // Variável para armazenar a instância de áudio atual
+    let audioAtual = null;
+    
     // Inicializa o jogo quando a página carregar
     document.addEventListener('DOMContentLoaded', function() {
+      // Configura o controle de volume
+      const controleVolume = document.getElementById('volume');
+      if (controleVolume) {
+        controleVolume.addEventListener('input', function(e) {
+          const volume = parseFloat(e.target.value);
+          if (audioAtual) {
+            audioAtual.volume = volume;
+          }
+        });
+      }
       // Verifica se a pasta de áudios existe
       arquivoExiste('silabas_sons/ba.mp3').then(existe => {
         if (!existe) {
@@ -245,29 +281,38 @@
       // Se já estiver tocando, não faz nada
       if (botaoAudio.classList.contains('tocando')) return;
       
-      // Cria um novo elemento de áudio para cada reprodução
-      const audio = new Audio();
-      audio.src = `silabas_sons/${silabaAtual}.mp3`;
+      // Para qualquer áudio que esteja tocando
+      if (audioAtual) {
+        audioAtual.pause();
+        audioAtual.currentTime = 0;
+      }
       
-      // Configurações para volume máximo
-      audio.volume = 1.0;
-      audio.preload = 'auto';
+      // Cria um novo elemento de áudio para cada reprodução
+      audioAtual = new Audio();
+      audioAtual.src = `silabas_sons/${silabaAtual}.mp3`;
+      
+      // Ajusta o volume conforme o controle
+      const controleVolume = document.getElementById('volume');
+      if (controleVolume) {
+        audioAtual.volume = parseFloat(controleVolume.value);
+      } else {
+        audioAtual.volume = 1.0; // Volume máximo como padrão
+      }
       
       // Configura o áudio para tocar em modo de alta potência
-      audio.setAttribute('playsinline', '');
-      audio.muted = false;
+      audioAtual.preload = 'auto';
+      audioAtual.setAttribute('playsinline', '');
+      audioAtual.muted = false;
       
       // Tenta reproduzir o áudio
-      const playPromise = audio.play();
+      const playPromise = audioAtual.play();
       
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             botaoAudio.classList.add('tocando');
-            audio.onended = function() {
+            audioAtual.onended = function() {
               botaoAudio.classList.remove('tocando');
-              // Libera o recurso de áudio
-              audio.remove();
             };
           })
           .catch(error => {
@@ -289,12 +334,18 @@
     
     // Toca som de acerto
     function tocarSomAcerto() {
-      const audio = new Audio('sons/acerto.mp3');
-      audio.volume = 1.0; // Volume máximo
-      audio.preload = 'auto';
-      audio.load();
+      // Para qualquer áudio que esteja tocando
+      if (audioAtual) {
+        audioAtual.pause();
+        audioAtual.currentTime = 0;
+      }
+      
+      audioAtual = new Audio('sons/acerto.mp3');
+      audioAtual.volume = document.getElementById('volume') ? parseFloat(document.getElementById('volume').value) : 1.0;
+      audioAtual.preload = 'auto';
+      audioAtual.load();
       // Tenta reproduzir o som
-      const playPromise = audio.play();
+      const playPromise = audioAtual.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           console.error("Erro ao tocar som de acerto:", e);
@@ -310,12 +361,18 @@
     
     // Toca som de erro
     function tocarSomErro() {
-      const audio = new Audio('sons/erro.mp3');
-      audio.volume = 1.0; // Volume máximo
-      audio.preload = 'auto';
-      audio.load();
+      // Para qualquer áudio que esteja tocando
+      if (audioAtual) {
+        audioAtual.pause();
+        audioAtual.currentTime = 0;
+      }
+      
+      audioAtual = new Audio('sons/erro.mp3');
+      audioAtual.volume = document.getElementById('volume') ? parseFloat(document.getElementById('volume').value) : 1.0;
+      audioAtual.preload = 'auto';
+      audioAtual.load();
       // Tenta reproduzir o som
-      const playPromise = audio.play();
+      const playPromise = audioAtual.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           console.error("Erro ao tocar som de erro:", e);
