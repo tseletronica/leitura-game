@@ -46,14 +46,14 @@
     }
     
     .botao-audio {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       background: #2196F3;
       border: none;
       color: white;
-      font-size: 2rem;
-      margin: 20px 0;
+      font-size: 1.8rem;
+      margin: 10px 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -67,8 +67,8 @@
     
     .resposta {
       font-size: 1.8rem;
-      min-height: 60px;
-      margin: 15px 0;
+      min-height: 50px;
+      margin: 10px 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -77,19 +77,24 @@
     .opcoes {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
       width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
+      max-width: 350px;
+      margin: 0 auto 15px;
+      padding: 0 10px;
     }
     
     .opcao {
-      padding: 15px;
-      font-size: 1.5rem;
+      padding: 10px 5px;
+      font-size: 1.3rem;
       border: 2px solid #2196F3;
       background: white;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .opcao:hover, .opcao.selecionada {
@@ -98,14 +103,17 @@
     }
     
     .botao-ok {
-      margin-top: 30px;
-      padding: 15px 40px;
-      font-size: 1.2rem;
+      margin: 10px 0 20px;
+      padding: 12px 30px;
+      font-size: 1.1rem;
       background: #FF9800;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       color: white;
       cursor: pointer;
+      position: sticky;
+      bottom: 10px;
+      z-index: 10;
     }
     
     .botao-ok:disabled {
@@ -124,12 +132,26 @@
     
     @media (max-width: 400px) {
       .opcoes {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        max-width: 300px;
+        gap: 6px;
       }
       
       .opcao {
-        padding: 12px;
-        font-size: 1.3rem;
+        padding: 8px 5px;
+        font-size: 1.2rem;
+        min-height: 45px;
+      }
+      
+      .botao-audio {
+        width: 65px;
+        height: 65px;
+        font-size: 1.6rem;
+      }
+      
+      .resposta {
+        font-size: 1.6rem;
+        min-height: 45px;
       }
     }
   </style>
