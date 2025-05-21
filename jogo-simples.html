@@ -238,22 +238,24 @@
       });
     });
     
-    // Função para carregar e tocar áudio
+    // Função para carregar e tocar áudio com volume máximo
     function tocarAudio() {
       const botaoAudio = document.querySelector('.botao-audio');
       
       // Se já estiver tocando, não faz nada
       if (botaoAudio.classList.contains('tocando')) return;
       
-      // Tenta carregar o áudio da sílaba atual
-      const audio = new Audio(`silabas_sons/${silabaAtual}.mp3`);
+      // Cria um novo elemento de áudio para cada reprodução
+      const audio = new Audio();
+      audio.src = `silabas_sons/${silabaAtual}.mp3`;
       
-      // Aumenta o volume para o máximo (1.0)
+      // Configurações para volume máximo
       audio.volume = 1.0;
-      
-      // Configura o áudio para tocar em alta potência
       audio.preload = 'auto';
-      audio.load();
+      
+      // Configura o áudio para tocar em modo de alta potência
+      audio.setAttribute('playsinline', '');
+      audio.muted = false;
       
       // Tenta reproduzir o áudio
       const playPromise = audio.play();
@@ -264,14 +266,23 @@
             botaoAudio.classList.add('tocando');
             audio.onended = function() {
               botaoAudio.classList.remove('tocando');
+              // Libera o recurso de áudio
+              audio.remove();
             };
           })
           .catch(error => {
             console.error("Erro ao reproduzir áudio:", error);
-            console.log("Tentando reproduzir com volume mais baixo...");
-            // Tenta novamente com volume mais baixo se falhar
-            audio.volume = 0.8;
-            audio.play().catch(e => console.error("Falha ao reproduzir áudio:", e));
+            // Tenta novamente com interação do usuário
+            document.body.addEventListener('click', function tentarNovamente() {
+              audio.play().then(() => {
+                botaoAudio.classList.add('tocando');
+                audio.onended = function() {
+                  botaoAudio.classList.remove('tocando');
+                  audio.remove();
+                };
+                document.body.removeEventListener('click', tentarNovamente);
+              });
+            }, { once: true });
           });
       }
     }
@@ -280,20 +291,42 @@
     function tocarSomAcerto() {
       const audio = new Audio('sons/acerto.mp3');
       audio.volume = 1.0; // Volume máximo
-      audio.play().catch(e => {
-        console.error("Erro ao tocar som de acerto:", e);
-        console.log("Verifique se o arquivo de som existe em: sons/acerto.mp3");
-      });
+      audio.preload = 'auto';
+      audio.load();
+      // Tenta reproduzir o som
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.error("Erro ao tocar som de acerto:", e);
+          // Tenta novamente com interação do usuário
+          document.body.addEventListener('click', function tentarNovamente() {
+            audio.play().finally(() => {
+              document.body.removeEventListener('click', tentarNovamente);
+            });
+          }, { once: true });
+        });
+      }
     }
     
     // Toca som de erro
     function tocarSomErro() {
       const audio = new Audio('sons/erro.mp3');
       audio.volume = 1.0; // Volume máximo
-      audio.play().catch(e => {
-        console.error("Erro ao tocar som de erro:", e);
-        console.log("Verifique se o arquivo de som existe em: sons/erro.mp3");
-      });
+      audio.preload = 'auto';
+      audio.load();
+      // Tenta reproduzir o som
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          console.error("Erro ao tocar som de erro:", e);
+          // Tenta novamente com interação do usuário
+          document.body.addEventListener('click', function tentarNovamente() {
+            audio.play().finally(() => {
+              document.body.removeEventListener('click', tentarNovamente);
+            });
+          }, { once: true });
+        });
+      }
     }
     
     // Verifica a resposta quando o botão OK for clicado
