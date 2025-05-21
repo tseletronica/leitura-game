@@ -22,13 +22,11 @@
     
     .placar {
       display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin-bottom: 15px;
+      justify-content: center;
+      gap: 30px;
+      margin: 10px 0;
       font-size: 1.2rem;
       color: #1a237e;
-      flex-wrap: wrap;
-      gap: 10px;
     }
     
     .acertos, .erros {
@@ -40,15 +38,7 @@
     .acertos { background: #4CAF50; }
     .erros { background: #f44336; }
     
-    .controle-volume {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    
-    #volume {
-      width: 80px;
-    }
+
     
     .area-jogo {
       flex: 1;
@@ -178,11 +168,6 @@
   <div class="placar">
     <div>Acertos: <span id="acertos">0</span></div>
     <div>Erros: <span id="erros">0</span></div>
-    <div class="controle-volume">
-      <span>🔈</span>
-      <input type="range" id="volume" min="0" max="2" step="0.1" value="1">
-      <span>🔊</span>
-    </div>
   </div>
   
   <div class="area-jogo" style="text-align: center;">
@@ -232,21 +217,8 @@
       }
     }
     
-    // Variável para armazenar a instância de áudio atual
-    let audioAtual = null;
-    
     // Inicializa o jogo quando a página carregar
     document.addEventListener('DOMContentLoaded', function() {
-      // Configura o controle de volume
-      const controleVolume = document.getElementById('volume');
-      if (controleVolume) {
-        controleVolume.addEventListener('input', function(e) {
-          const volume = parseFloat(e.target.value);
-          if (audioAtual) {
-            audioAtual.volume = volume;
-          }
-        });
-      }
       // Verifica se a pasta de áudios existe
       arquivoExiste('silabas_sons/ba.mp3').then(existe => {
         if (!existe) {
@@ -281,37 +253,22 @@
       // Se já estiver tocando, não faz nada
       if (botaoAudio.classList.contains('tocando')) return;
       
-      // Para qualquer áudio que esteja tocando
-      if (audioAtual) {
-        audioAtual.pause();
-        audioAtual.currentTime = 0;
-      }
-      
       // Cria um novo elemento de áudio para cada reprodução
-      audioAtual = new Audio();
-      audioAtual.src = `silabas_sons/${silabaAtual}.mp3`;
-      
-      // Ajusta o volume conforme o controle
-      const controleVolume = document.getElementById('volume');
-      if (controleVolume) {
-        audioAtual.volume = parseFloat(controleVolume.value);
-      } else {
-        audioAtual.volume = 1.0; // Volume máximo como padrão
-      }
-      
-      // Configura o áudio para tocar em modo de alta potência
-      audioAtual.preload = 'auto';
-      audioAtual.setAttribute('playsinline', '');
-      audioAtual.muted = false;
+      const audio = new Audio();
+      audio.src = `silabas_sons/${silabaAtual}.mp3`;
+      audio.volume = 1.0; // Volume máximo
+      audio.preload = 'auto';
+      audio.setAttribute('playsinline', '');
+      audio.muted = false;
       
       // Tenta reproduzir o áudio
-      const playPromise = audioAtual.play();
+      const playPromise = audio.play();
       
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             botaoAudio.classList.add('tocando');
-            audioAtual.onended = function() {
+            audio.onended = function() {
               botaoAudio.classList.remove('tocando');
             };
           })
@@ -334,18 +291,11 @@
     
     // Toca som de acerto
     function tocarSomAcerto() {
-      // Para qualquer áudio que esteja tocando
-      if (audioAtual) {
-        audioAtual.pause();
-        audioAtual.currentTime = 0;
-      }
-      
-      audioAtual = new Audio('sons/acerto.mp3');
-      audioAtual.volume = document.getElementById('volume') ? parseFloat(document.getElementById('volume').value) : 1.0;
-      audioAtual.preload = 'auto';
-      audioAtual.load();
+      const audio = new Audio('sons/acerto.mp3');
+      audio.volume = 1.0; // Volume máximo
+      audio.preload = 'auto';
       // Tenta reproduzir o som
-      const playPromise = audioAtual.play();
+      const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           console.error("Erro ao tocar som de acerto:", e);
@@ -361,18 +311,11 @@
     
     // Toca som de erro
     function tocarSomErro() {
-      // Para qualquer áudio que esteja tocando
-      if (audioAtual) {
-        audioAtual.pause();
-        audioAtual.currentTime = 0;
-      }
-      
-      audioAtual = new Audio('sons/erro.mp3');
-      audioAtual.volume = document.getElementById('volume') ? parseFloat(document.getElementById('volume').value) : 1.0;
-      audioAtual.preload = 'auto';
-      audioAtual.load();
+      const audio = new Audio('sons/erro.mp3');
+      audio.volume = 1.0; // Volume máximo
+      audio.preload = 'auto';
       // Tenta reproduzir o som
-      const playPromise = audioAtual.play();
+      const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           console.error("Erro ao tocar som de erro:", e);
